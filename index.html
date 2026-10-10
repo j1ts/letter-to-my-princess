@@ -1,0 +1,965 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#150b2b">
+<meta property="og:title" content="Её Высочеству пришло послание">
+<meta property="og:description" content="Коснись печати, принцесса">
+<title>Письмо для Майи</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Marck+Script&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<style>
+/* Layout: one screen, mobile first. Twilight sky over a castle; the envelope drifts down on a gold trail onto a velvet cushion; tap → seal breaks, petals fall, letter is drawn out and becomes a framed parchment; the royal decree at its end leads to the crown finale. Single committed night look. */
+:root {
+  --sky-0: #150b2b;
+  --sky-1: #34184a;
+  --sky-2: #6e3567;
+  --sky-3: #c47e98;
+  --castle: #1a0d29;
+
+  --gold-1: #fff3cf;
+  --gold-2: #f0cd7a;
+  --gold-3: #c9963e;
+  --gold-4: #8a5f1d;
+
+  --ivory: #fcf6ea;
+  --ivory-2: #f1e3c7;
+  --lining: #e7a7b6;
+  --lining-2: #d98ea2;
+  --rose: #b3365e;
+  --rose-deep: #7d1d3f;
+  --blush: #f6cbd5;
+
+  --ink: #3a2131;
+  --ink-soft: rgba(58, 33, 49, .66);
+
+  --font-script: "Great Vibes", "Marck Script", cursive;
+  --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+
+  color-scheme: dark;
+}
+
+html { box-sizing: border-box; height: 100%; overflow: hidden; overscroll-behavior: none; }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  background-color: var(--sky-0);
+  background-image: linear-gradient(to bottom, var(--sky-0) 0%, var(--sky-1) 42%, var(--sky-2) 76%, var(--sky-3) 100%);
+  color: var(--gold-1);
+  font-family: var(--font-serif);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.sky { z-index: 0; }
+.fx { z-index: 5; }
+.fx.top { z-index: 25; }
+
+.castle {
+  position: fixed; left: 50%; bottom: 0; z-index: 1;
+  height: min(20vh, 170px); width: auto; max-width: none;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.castle .win { fill: var(--gold-2); animation: flicker 5s ease-in-out infinite; }
+.castle .win:nth-child(2n) { animation-delay: -2.1s; }
+.castle .win:nth-child(3n) { animation-delay: -3.7s; }
+@keyframes flicker { 0%, 100% { opacity: .85; } 50% { opacity: .45; } }
+
+/* ---------- stage ---------- */
+.stage {
+  --slot-w: min(78vw, 340px, 58vh);
+  position: absolute; inset: 0; z-index: 2;
+  overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: clamp(18px, 4vh, 34px);
+  padding-inline: 16px;
+  padding-block: env(safe-area-inset-top, 0px) calc(8vh + env(safe-area-inset-bottom, 0px));
+}
+.eyebrow, .hint { margin: 0; text-align: center; opacity: 0; }
+.eyebrow {
+  font-style: italic; font-weight: 500;
+  font-size: clamp(24px, 6.8vw, 32px); line-height: 1.2;
+  color: var(--gold-1);
+  text-wrap: balance;
+  transform: translateY(-8px);
+  transition: opacity 1s ease, transform 1s ease;
+  text-shadow: 0 0 18px rgba(240, 205, 122, .35);
+}
+.hint {
+  min-height: 1.4em;
+  margin-top: calc(var(--slot-w) * .2);
+  font-size: 15px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold-2);
+  transition: opacity 1s ease .3s;
+}
+.ready .eyebrow { opacity: 1; transform: none; }
+.ready .hint { opacity: .85; animation: breathe 2.6s ease-in-out 1.3s infinite; }
+.opening .eyebrow, .opening .hint { opacity: 0; animation: none; transition-delay: 0s; transition-duration: .4s; }
+@keyframes breathe { 50% { opacity: .4; } }
+
+.slot {
+  position: relative;
+  width: var(--slot-w);
+  max-width: 100%;
+  aspect-ratio: 3 / 2;
+  transition: transform 1.1s cubic-bezier(.4, .1, .2, 1), opacity .7s ease;
+}
+.opening .slot { transform: translateY(12vh); }
+
+.halo {
+  position: absolute; inset: -38% -30%;
+  background: radial-gradient(closest-side, rgba(255, 223, 150, .38), rgba(255, 223, 150, .1) 55%, transparent);
+  opacity: 0; transition: opacity 1.2s ease;
+  pointer-events: none;
+}
+.ready .halo { opacity: 1; animation: glow 3.4s ease-in-out infinite; }
+.opening .halo { opacity: 0; animation: none; }
+@keyframes glow { 50% { transform: scale(1.08); opacity: .65; } }
+
+.cushion {
+  position: absolute; left: -9%; width: 118%; top: 72%; height: 60%;
+  pointer-events: none;
+}
+.cushion svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.intro .cushion { animation: cushion-in 1s cubic-bezier(.2, .8, .3, 1) .2s backwards; }
+.landed .cushion svg { animation: squish .55s cubic-bezier(.3, 1.6, .5, 1); transform-origin: 50% 80%; }
+@keyframes cushion-in { from { opacity: 0; transform: translateY(18px) scale(.9); } }
+@keyframes squish { 30% { transform: scale(1.04, .9); } }
+
+.env-btn {
+  position: absolute; inset: 0;
+  padding: 0; margin: 0; border: 0; background: none;
+  cursor: pointer; touch-action: manipulation;
+  border-radius: 8px;
+  transition: transform .9s cubic-bezier(.55, 0, .7, .3), opacity .7s ease .1s;
+}
+.env-btn:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 8px; }
+.intro .env-btn { animation: descend 3s ease-in-out .5s backwards; }
+@keyframes descend {
+  0%   { transform: translate(0, -88vh) rotate(-14deg) scale(.82); opacity: 0; }
+  8%   { opacity: 1; }
+  28%  { transform: translate(13vw, -60vh) rotate(10deg) scale(.88); }
+  50%  { transform: translate(-11vw, -32vh) rotate(-8deg) scale(.94); }
+  72%  { transform: translate(6vw, -10vh) rotate(4deg) scale(.98); }
+  88%  { transform: translate(-1vw, .8vh) rotate(-1.2deg) scale(1); }
+  100% { transform: none; opacity: 1; }
+}
+.leave .slot { opacity: 0; }
+.leave .env-btn { transform: translateY(40vh) rotate(6deg); opacity: 0; }
+
+/* ---------- envelope ---------- */
+.envelope { position: absolute; inset: 0; perspective: 1100px; container-type: inline-size; }
+.env-back, .face.in {
+  background:
+    radial-gradient(circle, rgba(255, 238, 200, .6) 1px, transparent 1.7px) 0 0 / 11px 11px,
+    linear-gradient(to bottom, var(--lining), var(--lining-2));
+}
+.env-back {
+  position: absolute; inset: 0; z-index: 0; border-radius: 6px;
+  box-shadow: 0 26px 40px -24px rgba(10, 0, 20, .75);
+}
+
+.letter-mini {
+  position: absolute; left: 7%; right: 7%; top: 5%; height: 88%; z-index: 2;
+  border-radius: 3px;
+  background: radial-gradient(120% 90% at 50% 40%, var(--ivory), var(--ivory-2));
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .2), inset 0 0 0 2px var(--ivory), inset 0 0 0 3px rgba(201, 150, 62, .6);
+  padding: 6% 9%;
+  color: var(--ink);
+  text-align: center;
+  transition: transform 1.05s cubic-bezier(.3, .75, .25, 1);
+}
+.pull1 .letter-mini { transform: translateY(-58%); }
+.pull2 .letter-mini { transform: translateY(-104%) rotate(-1.5deg); transition-duration: .7s; transition-timing-function: cubic-bezier(.45, 0, .3, 1); }
+.mini-crown { width: 16%; display: block; margin: 0 auto; }
+.mini-greet { font-family: var(--font-script); font-size: 26px; font-size: 8.5cqw; line-height: 1.25; color: var(--rose-deep); }
+.mini-lines i { display: block; height: 1.5px; margin: 4.6cqw auto 0; background: rgba(58, 33, 49, .15); border-radius: 1px; }
+
+.pocket { position: absolute; inset: 0; z-index: 3; filter: drop-shadow(0 -2px 3px rgba(80, 40, 30, .22)); pointer-events: none; }
+.pocket svg { display: block; width: 100%; height: 100%; border-radius: 6px; overflow: hidden; }
+
+.deco { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.addr { position: absolute; left: 8%; top: 66%; color: var(--ink); text-align: left; }
+.addr small { display: block; font-style: italic; font-size: 13px; font-size: 4.3cqw; color: var(--ink-soft); }
+.addr b {
+  display: block; font-weight: 400;
+  font-family: var(--font-script); font-size: 26px; font-size: 8.4cqw; line-height: 1.05;
+  color: var(--rose-deep);
+}
+.stamp {
+  position: absolute; right: 7%; top: 55%; width: 16%; aspect-ratio: 4 / 5;
+  padding: 3px;
+  background: radial-gradient(circle, transparent 0 2.1px, var(--ivory) 2.5px) -3px -3px / 6px 6px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .2));
+  transform: rotate(3deg);
+}
+.stamp-in {
+  width: 100%; height: 100%;
+  background: linear-gradient(160deg, #c94a72, var(--rose-deep));
+  box-shadow: inset 0 0 0 1.5px rgba(240, 205, 122, .8);
+  display: grid; place-items: center;
+}
+.stamp-in svg { width: 66%; }
+
+.flap-shadow { position: absolute; inset: 0; z-index: 3; pointer-events: none; transition: opacity .3s ease; }
+.opening .flap-shadow { opacity: 0; }
+
+.flap {
+  position: absolute; left: 0; right: 0; top: 0; height: 60%; z-index: 4;
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+  transition: transform .8s cubic-bezier(.45, .05, .3, 1);
+}
+.flap.behind { z-index: 1; }
+.open .flap { transform: rotateX(180deg); }
+.face { position: absolute; inset: 0; display: block; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.face.in { clip-path: polygon(0 100%, 100% 100%, 50% 0); transform: rotateX(180deg); }
+
+.seal {
+  position: absolute; left: 50%; top: 60%; width: 25%; aspect-ratio: 1; z-index: 5;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.seal .half { position: absolute; inset: 0; transition: transform .7s cubic-bezier(.5, 0, .75, .4), opacity .55s ease .15s; filter: drop-shadow(0 2px 2px rgba(40, 0, 10, .45)); }
+.seal .half svg { display: block; width: 100%; height: 100%; }
+.seal .hl { clip-path: polygon(0 0, 54% 0, 46% 38%, 55% 62%, 47% 100%, 0 100%); }
+.seal .hr { clip-path: polygon(54% 0, 100% 0, 100% 100%, 47% 100%, 55% 62%, 46% 38%); }
+.opening .seal .hl { transform: translate(-40%, 90%) rotate(-40deg); opacity: 0; }
+.opening .seal .hr { transform: translate(40%, 95%) rotate(38deg); opacity: 0; }
+.seal::after { content: ""; position: absolute; inset: -4%; border-radius: 50%; border: 1.5px solid var(--gold-2); opacity: 0; }
+.ready:not(.opening) .seal::after { animation: ring 2.4s ease-out 1s infinite; }
+@keyframes ring { 0% { transform: scale(.9); opacity: .9; } 100% { transform: scale(1.75); opacity: 0; } }
+
+/* ---------- parchment ---------- */
+.reader[hidden], .finale[hidden] { display: none; }
+.reader {
+  position: fixed; inset: 0; z-index: 10;
+  overflow: hidden;
+  transition: opacity .45s ease;
+}
+.reader.closing { opacity: 0; }
+.sheet {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 16px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  left: 0; right: 0;
+  margin: auto;
+  width: min(calc(100% - 32px), 460px);
+  max-height: 900px;
+  overflow: hidden;
+  transform-origin: 0 0;
+  border-radius: 4px;
+  background: radial-gradient(130% 90% at 50% 35%, #fefaf1 0%, #f8eedb 62%, #ead8b6 100%);
+  box-shadow: 0 34px 70px -24px rgba(5, 0, 15, .8), 0 0 60px -10px rgba(240, 205, 122, .35);
+  color: var(--ink);
+}
+.frame { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+.frame::before, .frame::after { content: ""; position: absolute; border-radius: 2px; }
+.frame::before { inset: 10px; border: 1.5px solid var(--gold-3); }
+.frame::after { inset: 15px; border: 1px solid rgba(201, 150, 62, .55); }
+.corner { position: absolute; width: 38px; height: 38px; color: var(--gold-3); }
+.corner.tl { left: 5px; top: 5px; }
+.corner.tr { right: 5px; top: 5px; transform: scaleX(-1); }
+.corner.bl { left: 5px; bottom: 5px; transform: scaleY(-1); }
+.corner.br { right: 5px; bottom: 5px; transform: scale(-1, -1); }
+
+.scroll {
+  position: absolute; inset: 0; z-index: 1;
+  overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  touch-action: pan-y;
+  overflow-wrap: break-word;
+  padding: 46px 28px 50px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 14px, #000 46px, #000 calc(100% - 46px), transparent calc(100% - 14px));
+  mask-image: linear-gradient(to bottom, transparent 14px, #000 46px, #000 calc(100% - 46px), transparent calc(100% - 14px));
+  scrollbar-width: none;
+}
+.scroll::-webkit-scrollbar { display: none; }
+.scroll .r { opacity: 0; transform: translateY(8px); transition: opacity .8s ease, transform .8s ease; transition-delay: calc(var(--i) * 140ms); }
+.scroll.show .r { opacity: 1; transform: none; }
+
+.mono { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mono svg { width: 58px; filter: drop-shadow(0 2px 3px rgba(138, 95, 29, .35)); }
+.mono span { font-size: 14px; font-weight: 700; letter-spacing: .32em; color: var(--gold-4); padding-left: .32em; }
+.p-to { margin: 18px 0 0; text-align: center; font-size: 13px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.p-greet { margin: 6px 0 4px; text-align: center; font-family: var(--font-script); font-weight: 400; font-size: 46px; line-height: 1.15; color: var(--rose-deep); }
+.p-body { margin: 12px 0 0; font-size: 21px; font-weight: 500; line-height: 1.55; text-wrap: pretty; }
+.p-body.first::first-letter {
+  float: left; margin: 6px 8px 0 0;
+  font-size: 3.3em; line-height: .8; font-weight: 700;
+  color: var(--rose);
+  text-shadow: 1px 1px 0 var(--gold-2);
+}
+.p-date { margin: 18px 0 0; text-align: right; font-style: italic; font-size: 17px; color: var(--ink-soft); }
+
+.orn { display: flex; align-items: center; gap: 12px; margin: 30px 0 22px; color: var(--gold-3); }
+.orn i { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--gold-3)); }
+.orn i:last-child { background: linear-gradient(to left, transparent, var(--gold-3)); }
+.orn svg { width: 30px; }
+
+.decree { text-align: center; }
+.ribbon {
+  display: inline-block; padding: 9px 30px;
+  background: linear-gradient(to bottom, #c4466e, var(--rose-deep));
+  color: var(--gold-1);
+  font-size: 15px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+  clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 50%, 100% 100%, 0 100%, 13px 50%);
+}
+.d-sub { margin: 10px 0 0; font-style: italic; font-size: 17px; color: var(--ink-soft); }
+.d-intro { margin: 16px 0 0; font-size: 20px; font-weight: 500; line-height: 1.5; text-align: left; }
+.articles { list-style: none; margin: 14px 0 0; padding: 0; counter-reset: art; text-align: left; display: grid; gap: 10px; }
+.articles li {
+  counter-increment: art;
+  display: grid; grid-template-columns: 2.1em 1fr; align-items: baseline;
+  font-size: 20px; font-weight: 500; line-height: 1.45;
+}
+.articles li::before { content: counter(art, upper-roman) "."; font-weight: 700; color: var(--gold-4); }
+.d-close { margin: 18px 0 0; font-style: italic; font-size: 18px; color: var(--ink-soft); }
+.d-seal { display: block; width: 92px; margin: 18px auto 0; transform: rotate(-8deg); filter: drop-shadow(0 3px 3px rgba(60, 0, 20, .35)); }
+
+.crown-btn {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 26px auto 6px; min-height: 54px; padding: 0 28px;
+  border: 0; border-radius: 999px;
+  background: linear-gradient(to bottom, #fff2c8, var(--gold-2) 52%, var(--gold-3));
+  box-shadow: 0 8px 20px -8px rgba(138, 95, 29, .8), inset 0 0 0 1px rgba(255, 255, 255, .5);
+  color: #4a2a10;
+  font-family: var(--font-serif); font-size: 21px; font-weight: 700;
+  cursor: pointer; touch-action: manipulation;
+}
+.crown-btn svg { width: 28px; }
+.crown-btn::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .75), transparent);
+  animation: shine 3.2s ease-in-out 1s infinite;
+}
+@keyframes shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+.crown-btn:focus-visible, .f-btn:focus-visible, .f-link:focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; }
+.f-btn:focus-visible, .f-link:focus-visible { outline-color: var(--gold-2); }
+
+/* ---------- finale ---------- */
+.finale {
+  position: fixed; inset: 0; z-index: 20;
+  display: grid; place-items: center;
+  padding-inline: 16px;
+  padding-block: calc(env(safe-area-inset-top, 0px) + 16px) calc(env(safe-area-inset-bottom, 0px) + 16px);
+  background: radial-gradient(120% 80% at 50% 36%, rgba(84, 38, 92, .88), rgba(18, 9, 38, .96));
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  opacity: 0; transition: opacity .6s ease;
+  overflow: hidden;
+}
+.finale.on { opacity: 1; }
+.f-inner { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 420px; }
+.rays {
+  position: absolute; left: 50%; top: 74px; width: 560px; height: 560px; margin: -280px 0 0 -280px;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 223, 150, .28) 0deg 5deg, transparent 5deg 15deg);
+  -webkit-mask-image: radial-gradient(closest-side, #000 15%, transparent 72%);
+  mask-image: radial-gradient(closest-side, #000 15%, transparent 72%);
+  opacity: 0; transition: opacity 1.2s ease 1.1s;
+  animation: spin 40s linear infinite;
+  pointer-events: none;
+}
+.on .rays { opacity: 1; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.f-crown {
+  position: relative; width: min(50vw, 200px, 24vh);
+  filter: drop-shadow(0 0 22px rgba(255, 214, 130, .55)) drop-shadow(0 8px 10px rgba(0, 0, 0, .35));
+  transform: translateY(-80vh);
+}
+.on .f-crown { animation: crown-drop 1.35s cubic-bezier(.3, .7, .3, 1) .15s forwards; }
+@keyframes crown-drop {
+  0%   { transform: translateY(-80vh) rotate(-26deg) scale(.7); }
+  62%  { transform: translateY(5%) rotate(5deg) scale(1.03); }
+  80%  { transform: translateY(-3%) rotate(-2deg) scale(1); }
+  100% { transform: none; }
+}
+.f-txt { opacity: 0; transform: translateY(10px); transition: opacity .9s ease, transform .9s ease; }
+.on .f-txt { opacity: 1; transform: none; }
+.on .f-small { transition-delay: 1.4s; }
+.on .f-big { transition-delay: 1.75s; }
+.on .f-title { transition-delay: 2.1s; }
+.on .f-actions { transition-delay: 2.6s; }
+.f-small { margin: 26px 0 0; font-style: italic; font-size: 23px; color: var(--gold-1); }
+.f-big {
+  margin: 0; padding: 0 .15em;
+  font-family: var(--font-script); font-weight: 400; font-size: min(clamp(46px, 14vw, 72px), 9vh); line-height: 1.2;
+  background: linear-gradient(100deg, var(--gold-3) 0%, var(--gold-1) 25%, var(--gold-2) 50%, var(--gold-1) 75%, var(--gold-3) 100%) 0 0 / 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: sheen 5s linear infinite;
+}
+@keyframes sheen { to { background-position: -200% 0; } }
+.f-title { margin: 8px 0 0; font-size: 14px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--blush); line-height: 1.6; text-wrap: balance; }
+.f-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 30px; }
+.f-btn {
+  min-height: 48px; padding: 0 26px; border-radius: 999px;
+  border: 1px solid rgba(240, 205, 122, .6); background: rgba(240, 205, 122, .1);
+  color: var(--gold-1); font-family: var(--font-serif); font-size: 19px; font-weight: 600;
+  cursor: pointer; touch-action: manipulation;
+}
+.f-link {
+  min-height: 44px; padding: 0 14px; border: 0; background: none;
+  color: var(--blush); opacity: .8; font-family: var(--font-serif); font-style: italic; font-size: 17px;
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px;
+  cursor: pointer; touch-action: manipulation;
+}
+
+.no-tr, .no-tr * { transition: none !important; }
+
+@media (min-width: 700px) {
+  .scroll { padding-inline: 48px; }
+  .p-body { font-size: 22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro .env-btn, .intro .cushion { animation-duration: .01ms !important; animation-delay: 0s !important; }
+  .ready .hint, .ready .halo, .ready:not(.opening) .seal::after, .rays, .crown-btn::after, .f-big, .castle .win { animation: none !important; }
+  .on .f-crown { animation-duration: .4s; }
+  .flap, .letter-mini, .seal .half, .slot, .env-btn { transition-duration: .3s !important; }
+  .scroll .r { transition-delay: 0s; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="goldG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff4cc"/><stop offset=".45" stop-color="#f0c96e"/><stop offset=".78" stop-color="#c99236"/><stop offset="1" stop-color="#8f6420"/>
+    </linearGradient>
+    <linearGradient id="goldH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c99236"/><stop offset=".5" stop-color="#f5d88c"/><stop offset="1" stop-color="#c99236"/>
+    </linearGradient>
+    <radialGradient id="wax" cx="36%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#d9557c"/><stop offset=".55" stop-color="#a3244a"/><stop offset="1" stop-color="#5e0d2a"/>
+    </radialGradient>
+    <radialGradient id="velvet" cx="45%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#d9608a"/><stop offset=".55" stop-color="#9c2a52"/><stop offset="1" stop-color="#55102e"/>
+    </radialGradient>
+    <linearGradient id="flapG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fdf7ec"/><stop offset="1" stop-color="#efdfc2"/></linearGradient>
+    <linearGradient id="sideL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7ecd9"/><stop offset="1" stop-color="#ead8b8"/></linearGradient>
+    <linearGradient id="sideR" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#f7ecd9"/><stop offset="1" stop-color="#ead8b8"/></linearGradient>
+    <linearGradient id="bottomG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fcf5e8"/><stop offset="1" stop-color="#f0e1c4"/></linearGradient>
+
+    <symbol id="heart" viewBox="0 0 24 24">
+      <path d="M12 21.2s-7.6-4.6-9.7-9.3C.8 8.5 3 4.4 6.8 4.4c2.1 0 3.5 1.1 4.2 2.5h2c.7-1.4 2.1-2.5 4.2-2.5 3.8 0 6 4.1 4.5 7.5-2.1 4.7-9.7 9.3-9.7 9.3z"/>
+    </symbol>
+
+    <symbol id="crown" viewBox="0 0 200 150">
+      <path d="M26,114 L10,46 L52,82 L70,34 L88,74 L100,16 L112,74 L130,34 L148,82 L190,46 L174,114 Z" fill="url(#goldG)" stroke="#8a5f1d" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M33,104 L24,66 L54,92 L70,50 L88,86 L100,36 L112,86 L130,50 L146,92 L176,66 L167,104" fill="none" stroke="#fff6d8" stroke-opacity=".6" stroke-width="2" stroke-linejoin="round"/>
+      <rect x="20" y="106" width="160" height="28" rx="7" fill="url(#goldG)" stroke="#8a5f1d" stroke-width="2.5"/>
+      <circle cx="10" cy="42" r="8" fill="#fffaf0" stroke="#c99236" stroke-width="2"/>
+      <circle cx="70" cy="30" r="8" fill="#fffaf0" stroke="#c99236" stroke-width="2"/>
+      <circle cx="100" cy="11" r="10" fill="#fffaf0" stroke="#c99236" stroke-width="2"/>
+      <circle cx="130" cy="30" r="8" fill="#fffaf0" stroke="#c99236" stroke-width="2"/>
+      <circle cx="190" cy="42" r="8" fill="#fffaf0" stroke="#c99236" stroke-width="2"/>
+      <use href="#heart" x="87" y="52" width="26" height="26" fill="#d93a68"/>
+      <ellipse cx="100" cy="120" rx="11" ry="8.5" fill="#d93a68" stroke="#7d1d3f" stroke-width="1.5"/>
+      <ellipse cx="97" cy="117" rx="3.5" ry="2.2" fill="#fff" fill-opacity=".6"/>
+      <circle cx="62" cy="120" r="6.5" fill="#f08bab" stroke="#b3365e" stroke-width="1.2"/>
+      <circle cx="138" cy="120" r="6.5" fill="#f08bab" stroke="#b3365e" stroke-width="1.2"/>
+      <circle cx="38" cy="120" r="3.6" fill="#fffaf0"/><circle cx="162" cy="120" r="3.6" fill="#fffaf0"/>
+      <circle cx="80" cy="120" r="3" fill="#fffaf0"/><circle cx="120" cy="120" r="3" fill="#fffaf0"/>
+    </symbol>
+
+    <symbol id="seal-art" viewBox="0 0 100 100">
+      <g fill="url(#wax)">
+        <circle cx="50" cy="50" r="40"/>
+        <circle cx="50" cy="11" r="7"/><circle cx="85" cy="36" r="7"/><circle cx="83" cy="72" r="8"/>
+        <circle cx="52" cy="90" r="6"/><circle cx="17" cy="78" r="7"/><circle cx="11" cy="42" r="6"/>
+        <circle cx="27" cy="16" r="6"/><circle cx="74" cy="15" r="5"/>
+      </g>
+      <circle cx="50" cy="50" r="30" fill="none" stroke="#4a0816" stroke-opacity=".45" stroke-width="3"/>
+      <circle cx="49" cy="49" r="30" fill="none" stroke="#ffd9df" stroke-opacity=".2" stroke-width="1.2"/>
+      <use href="#crown" x="35" y="23" width="30" height="22.5"/>
+      <text x="50.6" y="69.6" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="700" font-size="17" letter-spacing=".5" fill="#3d0718" fill-opacity=".6" class="seal-txt">ЯМЛ</text>
+      <text x="50" y="69" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-weight="700" font-size="17" letter-spacing=".5" fill="#f6d891" class="seal-txt">ЯМЛ</text>
+    </symbol>
+
+    <symbol id="corner" viewBox="0 0 40 40">
+      <g fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+        <path d="M4,36 C4,18 18,4 36,4"/>
+        <path d="M9,36 C9,23 23,9 36,9" stroke-opacity=".55"/>
+        <path d="M14,14 C10,10 12,5 16,6 C19,7 18,11 15,11"/>
+      </g>
+      <path d="M6,2 L8,6 L6,10 L4,6 Z" fill="currentColor"/>
+      <path d="M2,6 L6,4 L10,6 L6,8 Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<canvas class="sky" id="sky" aria-hidden="true"></canvas>
+
+<svg class="castle" viewBox="0 -14 400 134" aria-hidden="true">
+  <g fill="var(--castle)" fill-opacity=".92">
+    <path d="M200,-12 L200,10" stroke="var(--castle)" stroke-width="1.5"/>
+    <path d="M200,-12 L214,-8 L200,-4 Z" fill="var(--rose)"/>
+    <rect x="170" y="40" width="60" height="62"/><path d="M164,41 L200,8 L236,41 Z"/>
+    <rect x="140" y="55" width="22" height="47"/><path d="M136,56 L151,26 L166,56 Z"/>
+    <rect x="238" y="55" width="22" height="47"/><path d="M234,56 L249,26 L264,56 Z"/>
+    <rect x="112" y="70" width="17" height="32"/><path d="M109,71 L120.5,48 L132,71 Z"/>
+    <rect x="271" y="70" width="17" height="32"/><path d="M268,71 L279.5,48 L291,71 Z"/>
+    <rect x="124" y="80" width="152" height="22"/>
+    <rect x="124" y="75" width="7" height="6"/><rect x="164" y="75" width="7" height="6"/><rect x="229" y="75" width="7" height="6"/><rect x="269" y="75" width="7" height="6"/>
+    <path d="M0,120 L0,100 C50,92 120,97 200,95 C280,93 350,90 400,99 L400,120 Z"/>
+  </g>
+  <g>
+    <rect class="win" x="195" y="56" width="10" height="15" rx="5"/>
+    <rect class="win" x="148" y="66" width="6" height="9" rx="3"/>
+    <rect class="win" x="246" y="66" width="6" height="9" rx="3"/>
+    <rect class="win" x="118" y="80" width="5" height="7" rx="2.5"/>
+    <rect class="win" x="277" y="80" width="5" height="7" rx="2.5"/>
+    <rect class="win" x="180" y="80" width="5" height="8" rx="2.5"/>
+    <rect class="win" x="215" y="80" width="5" height="8" rx="2.5"/>
+  </g>
+</svg>
+
+<main class="stage" id="stage">
+  <p class="eyebrow">Её Высочеству пришло послание</p>
+
+  <div class="slot">
+    <div class="halo" aria-hidden="true"></div>
+    <div class="cushion" aria-hidden="true">
+      <svg viewBox="0 0 300 100" preserveAspectRatio="none">
+        <ellipse cx="150" cy="92" rx="125" ry="8" fill="#0a0414" fill-opacity=".45"/>
+        <path d="M18,46 C14,22 60,12 150,12 C240,12 286,22 282,46 C286,72 240,86 150,86 C60,86 14,72 18,46 Z" fill="url(#velvet)"/>
+        <path d="M18,46 C14,22 60,12 150,12 C240,12 286,22 282,46 C286,72 240,86 150,86 C60,86 14,72 18,46 Z" fill="none" stroke="url(#goldH)" stroke-width="2.5"/>
+        <ellipse cx="120" cy="30" rx="80" ry="10" fill="#fff" fill-opacity=".08"/>
+        <g fill="url(#goldG)">
+          <circle cx="78" cy="64" r="3.4"/><circle cx="150" cy="70" r="3.4"/><circle cx="222" cy="64" r="3.4"/>
+          <circle cx="16" cy="46" r="5"/><path d="M14,50 L6,80 L26,80 L18,50 Z"/>
+          <circle cx="284" cy="46" r="5"/><path d="M282,50 L274,80 L294,80 L286,50 Z"/>
+        </g>
+        <g stroke="#8a5f1d" stroke-opacity=".5" stroke-width="1">
+          <path d="M11,62 L10,80 M16,60 L16,80 M21,62 L22,80"/>
+          <path d="M279,62 L278,80 M284,60 L284,80 M289,62 L290,80"/>
+        </g>
+      </svg>
+    </div>
+
+    <button class="env-btn" id="envBtn" type="button" aria-label="Открыть послание">
+      <div class="envelope">
+        <div class="env-back"></div>
+
+        <div class="letter-mini" id="mini">
+          <svg class="mini-crown" viewBox="0 0 200 150"><use href="#crown"/></svg>
+          <div class="mini-greet" id="miniGreet"></div>
+          <div class="mini-lines"><i style="width:88%"></i><i style="width:94%"></i><i style="width:72%"></i><i style="width:90%"></i><i style="width:60%"></i></div>
+        </div>
+
+        <div class="pocket">
+          <svg viewBox="0 0 300 200" preserveAspectRatio="none">
+            <polygon points="0,0 156,112 0,200" fill="url(#sideL)"/>
+            <polygon points="300,0 144,112 300,200" fill="url(#sideR)"/>
+            <polygon points="0,200 150,96 300,200" fill="url(#bottomG)"/>
+            <polyline points="2,198 150,98 298,198" fill="none" stroke="url(#goldH)" stroke-opacity=".7" stroke-width="1" vector-effect="non-scaling-stroke"/>
+            <polyline points="7,12 7,193 293,193 293,12" fill="none" stroke="url(#goldH)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+          </svg>
+        </div>
+
+        <div class="deco" aria-hidden="true">
+          <div class="addr"><small id="addrTitle"></small><b id="addrName"></b></div>
+          <div class="stamp"><div class="stamp-in"><svg viewBox="0 0 200 150"><use href="#crown"/></svg></div></div>
+        </div>
+
+        <svg class="flap-shadow" viewBox="0 0 300 200" preserveAspectRatio="none" aria-hidden="true">
+          <defs><filter id="fs" x="-10%" y="-10%" width="120%" height="130%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+          <polygon points="6,2 294,2 150,126" fill="#3a1a10" fill-opacity=".2" filter="url(#fs)"/>
+        </svg>
+
+        <div class="flap" id="flap">
+          <svg class="face out" viewBox="0 0 300 120" preserveAspectRatio="none">
+            <polygon points="0,0 300,0 150,120" fill="url(#flapG)"/>
+            <polyline points="9,5 150,111 291,5" fill="none" stroke="url(#goldH)" stroke-width="1.4" vector-effect="non-scaling-stroke"/>
+          </svg>
+          <div class="face in"></div>
+        </div>
+
+        <div class="seal" id="seal" aria-hidden="true">
+          <div class="half hl"><svg viewBox="0 0 100 100"><use href="#seal-art"/></svg></div>
+          <div class="half hr"><svg viewBox="0 0 100 100"><use href="#seal-art"/></svg></div>
+        </div>
+      </div>
+    </button>
+  </div>
+
+  <p class="hint">Коснись печати, принцесса</p>
+</main>
+
+<canvas class="fx" id="fx" aria-hidden="true"></canvas>
+
+<div class="reader" id="reader" hidden>
+  <div class="sheet" id="sheet">
+    <div class="frame" aria-hidden="true">
+      <svg class="corner tl"><use href="#corner"/></svg>
+      <svg class="corner tr"><use href="#corner"/></svg>
+      <svg class="corner bl"><use href="#corner"/></svg>
+      <svg class="corner br"><use href="#corner"/></svg>
+    </div>
+    <article class="scroll" id="scroll"></article>
+  </div>
+</div>
+
+<div class="finale" id="finale" hidden>
+  <div class="f-inner">
+    <div class="rays" aria-hidden="true"></div>
+    <svg class="f-crown" id="fCrown" viewBox="0 0 200 150" aria-hidden="true"><use href="#crown"/></svg>
+    <p class="f-txt f-small" id="fSmall"></p>
+    <h2 class="f-txt f-big" id="fBig"></h2>
+    <p class="f-txt f-title" id="fTitle"></p>
+    <div class="f-txt f-actions">
+      <button class="f-btn" id="reread" type="button">Перечитать письмо</button>
+      <button class="f-link" id="restart" type="button">Открыть конверт заново</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const LETTER = {
+  envelopeTitle: "Её Высочеству",
+  envelopeName: "принцессе Майе",
+  monogram: "Я · М · Л",
+  sealText: "ЯМЛ",
+  to: "Её Высочеству Майе",
+  greeting: "Моя принцесса,",
+  paragraphs: [
+    "Я долго думал, что можно сделать для тебя в такой момент. Хотелось придумать что-то особенное, что-то, что останется с нами и к чему мы сможем возвращаться спустя время. Правда, я не очень умею устраивать такие вещи, поэтому до конца не уверен, что у меня всё получилось. Но мне очень хотелось попробовать ради тебя.",
+    "Поэтому пусть это будет настоящее письмо — с сургучной печатью и золотой каймой. Как и положено, когда пишешь принцессе.",
+    "Мне понравилось, как началось наше общение. Наша первая шутка про яйца была вроде бы обычной глупостью, но ты не просто посмеялась, а подхватила её и сделала ещё смешнее. Мне сразу понравилось, что у нас похожее чувство юмора. А чем больше мы общались, тем интереснее мне становилось узнавать тебя.",
+    "Мне понравилось, как подробно ты рассказываешь о своих мыслях, как много у тебя историй и находил что-то близкое себе.",
+    "Мне хотелось поскорее встретиться, хотелось продолжать разговоры и узнавать, какая ты. А сейчас я понимаю, что рядом с тобой мне спокойно и хорошо. Мне не нужно придумывать, каким быть или что сказать. Я могу просто оставаться собой. И с каждой нашей встречей мне всё меньше хочется с тобой прощаться и всё больше хочется оставаться рядом. Мне очень нравится, что ты появилась в моей жизни.",
+    "Я не знаю, что нас ждёт впереди, но мне хочется узнавать тебя дальше, слушать твои истории, показывать тебе то, что люблю сам, вместе смеяться над всякой ерундой и создавать наши собственные воспоминания. Хочется, чтобы у нас было много маленьких моментов, которые со стороны могут показаться совершенно обычными, но для нас будут значить очень многое.",
+    "Мне хотелось, чтобы начало нашей истории было не просто разговором, а особенным моментом, который останется у нас в памяти. Поэтому я решил сделать для тебя это письмо.",
+    "Пусть оно станет маленькой частью нашей истории, к которой мы сможем возвращаться и вспоминать, с чего всё начиналось.",
+    "А чтобы всё было официально, ниже прилагается королевский указ. Он вступает в силу в ту секунду, когда ты его прочтёшь."
+  ],
+  decree: {
+    title: "Королевский указ",
+    subtitle: "№ 1, о привилегиях Её Высочества",
+    intro: "Настоящим объявляется, что Её Высочество принцесса Майя, известная при дворе как Булочка, отныне обладает следующими правами:",
+    items: [
+      "Право на объятия в любое время дня и ночи, без очереди.",
+      "Право выбирать фильм, музыку и место для свидания.",
+      "Право на последний кусочек торта. Всегда.",
+      "Право писать мне когда угодно и получать ответ первой.",
+      "Право на мою куртку, если станет прохладно.",
+      "Право быть самой красивой в любом месте. Уже используется."
+    ],
+    closing: "Указ обжалованию не подлежит и действует бессрочно.",
+    button: "Принять корону"
+  },
+  finale: {
+    small: "Отныне ты официально",
+    big: "моя принцесса",
+    title: "Её Высочество Майя Я.Л."
+  }
+};
+
+const $ = (id) => document.getElementById(id);
+const stage = $("stage"), envBtn = $("envBtn"), flap = $("flap"), mini = $("mini"), seal = $("seal");
+const reader = $("reader"), sheet = $("sheet"), scroll = $("scroll"), finale = $("finale"), fxCanvas = $("fx");
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const T = (ms) => (reduce ? ms * 0.35 : ms);
+let busy = false, timers = [];
+const later = (fn, ms) => timers.push(setTimeout(fn, T(ms)));
+const rand = (a, b) => a + Math.random() * (b - a);
+const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+
+/* ---------- content ---------- */
+$("addrTitle").textContent = LETTER.envelopeTitle;
+$("addrName").textContent = LETTER.envelopeName;
+$("miniGreet").textContent = LETTER.greeting.replace(/,$/, "");
+document.querySelectorAll(".seal-txt").forEach((t) => (t.textContent = LETTER.sealText));
+$("fSmall").textContent = LETTER.finale.small;
+$("fBig").textContent = LETTER.finale.big;
+$("fTitle").textContent = LETTER.finale.title;
+
+let crownBtn;
+(function buildLetter() {
+  let i = 0;
+  const node = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    n.className = (cls ? cls + " " : "") + "r";
+    n.style.setProperty("--i", i++);
+    if (text) n.textContent = text;
+    scroll.append(n);
+    return n;
+  };
+  const mono = node("div", "mono");
+  mono.innerHTML = '<svg viewBox="0 0 200 150" aria-hidden="true"><use href="#crown"/></svg>';
+  const ms = document.createElement("span"); ms.textContent = LETTER.monogram; mono.append(ms);
+
+  node("p", "p-to", LETTER.to);
+  node("h1", "p-greet", LETTER.greeting);
+  LETTER.paragraphs.forEach((t, k) => node("p", "p-body" + (k === 0 ? " first" : ""), t));
+  const d = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(new Date()).replace(/\s*г\.?$/, "");
+  node("p", "p-date", "Написано " + d + " года");
+
+  const orn = node("div", "orn");
+  orn.innerHTML = '<i></i><svg viewBox="0 0 200 150" aria-hidden="true"><use href="#crown"/></svg><i></i>';
+
+  const dc = node("section", "decree");
+  const D = LETTER.decree;
+  const rib = document.createElement("h2"); rib.className = "ribbon"; rib.style.margin = "0"; rib.textContent = D.title;
+  const sub = document.createElement("p"); sub.className = "d-sub"; sub.textContent = D.subtitle;
+  const intro = document.createElement("p"); intro.className = "d-intro"; intro.textContent = D.intro;
+  const ol = document.createElement("ol"); ol.className = "articles";
+  D.items.forEach((t) => { const li = document.createElement("li"); li.textContent = t; ol.append(li); });
+  const close = document.createElement("p"); close.className = "d-close"; close.textContent = D.closing;
+  dc.append(rib, sub, intro, ol, close);
+  dc.insertAdjacentHTML("beforeend", '<svg class="d-seal" viewBox="0 0 100 100" aria-hidden="true"><use href="#seal-art"/></svg>');
+  crownBtn = document.createElement("button");
+  crownBtn.type = "button"; crownBtn.className = "crown-btn";
+  crownBtn.innerHTML = '<svg viewBox="0 0 200 150" aria-hidden="true"><use href="#crown"/></svg><span></span>';
+  crownBtn.querySelector("span").textContent = D.button;
+  crownBtn.addEventListener("click", showFinale);
+  dc.append(crownBtn);
+})();
+
+/* ---------- canvas: stars + particles ---------- */
+const sky = $("sky"), sctx = sky.getContext("2d"), fctx = fxCanvas.getContext("2d");
+let W = 0, H = 0, stars = [];
+function resize() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  W = window.innerWidth; H = window.innerHeight;
+  [sky, fxCanvas].forEach((c) => { c.width = W * dpr; c.height = H * dpr; });
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const n = Math.round(Math.min(90, (W * H) / 8000));
+  stars = Array.from({ length: n }, () => ({
+    x: Math.random() * W, y: Math.pow(Math.random(), 1.4) * H * 0.72,
+    r: rand(.4, 1.5), ph: rand(0, 6.28), sp: rand(.6, 2), big: Math.random() < .12
+  }));
+}
+resize();
+window.addEventListener("resize", resize);
+
+const GOLD = ["#fff4cc", "#f6d98c", "#f0c96e", "#ffe7a8", "#ffffff"];
+const PETAL = ["#f7c6d0", "#f2a7b9", "#e98aa2", "#fbd9e0", "#d9677f"];
+const CONF = ["#f0c96e", "#ffe7a8", "#c99236", "#f2a7b9", "#d93a68", "#fff4cc"];
+const P = [];
+let petalRate = 0, petalAcc = 0, trail = false;
+
+function add(p) { if (!reduce && P.length < 700) P.push(p); }
+function spark(x, y, vx, vy, s, m, g = 40) {
+  add({ k: 0, x, y, vx, vy, s, m, l: 0, g, r: rand(0, 6.28), c: pick(GOLD) });
+}
+function burstAt(x, y, n, o = {}) {
+  const dir = o.dir ?? -Math.PI / 2, spread = o.spread ?? Math.PI * 2;
+  for (let i = 0; i < n; i++) {
+    const a = dir + (Math.random() - .5) * spread, v = rand(...(o.speed || [70, 260]));
+    spark(x, y, Math.cos(a) * v, Math.sin(a) * v, rand(...(o.size || [2, 5])), rand(...(o.life || [.8, 1.7])), o.g ?? 60);
+  }
+}
+function petal(y = -20) {
+  add({ k: 1, x: Math.random() * W, y, vx: rand(-8, 22), vy: rand(32, 64), s: rand(6, 11), l: 0, m: 40,
+        r: rand(0, 6.28), vr: rand(-1.4, 1.4), ph: rand(0, 6.28), f: rand(1, 2.4), c: pick(PETAL) });
+}
+function confettiRain(n) {
+  for (let i = 0; i < n; i++) {
+    add({ k: 2, x: Math.random() * W, y: rand(-H * .5, -10), vx: rand(-30, 30), vy: rand(60, 160),
+          w: rand(5, 8), h: rand(9, 14), l: 0, m: 9, r: rand(0, 6.28), vr: rand(-4, 4), ph: rand(0, 6.28), f: rand(6, 12), c: pick(CONF) });
+  }
+}
+function confettiBurst(x, y, n) {
+  for (let i = 0; i < n; i++) {
+    const a = -Math.PI / 2 + (Math.random() - .5) * 2.2, v = rand(240, 560);
+    add({ k: 2, x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, w: rand(5, 8), h: rand(9, 14), l: 0, m: 7,
+          r: rand(0, 6.28), vr: rand(-6, 6), ph: rand(0, 6.28), f: rand(6, 12), c: pick(CONF) });
+  }
+}
+
+function drawSpark(c, p, a) {
+  const s = p.s;
+  c.globalAlpha = a * .35; c.fillStyle = p.c;
+  c.beginPath(); c.arc(p.x, p.y, s * .9, 0, 6.283); c.fill();
+  c.globalAlpha = a;
+  c.save(); c.translate(p.x, p.y); c.rotate(p.r);
+  c.beginPath();
+  c.moveTo(0, -s * 1.6); c.quadraticCurveTo(0, 0, s * 1.6, 0); c.quadraticCurveTo(0, 0, 0, s * 1.6);
+  c.quadraticCurveTo(0, 0, -s * 1.6, 0); c.quadraticCurveTo(0, 0, 0, -s * 1.6);
+  c.fill(); c.restore();
+}
+function drawPetal(c, p) {
+  const s = p.s;
+  c.save(); c.translate(p.x, p.y); c.rotate(p.r);
+  c.scale(.35 + .65 * Math.abs(Math.cos(p.l * p.f * 1.3 + p.ph)), 1);
+  c.globalAlpha = .92; c.fillStyle = p.c;
+  c.beginPath();
+  c.moveTo(0, -s); c.bezierCurveTo(s * .95, -s * .6, s * .7, s * .75, 0, s);
+  c.bezierCurveTo(-s * .7, s * .75, -s * .95, -s * .6, 0, -s);
+  c.fill();
+  c.globalAlpha = .25; c.strokeStyle = "#8b1f45"; c.lineWidth = .7;
+  c.beginPath(); c.moveTo(0, -s * .6); c.lineTo(0, s * .7); c.stroke();
+  c.restore();
+}
+function drawConfetti(c, p) {
+  c.save(); c.translate(p.x, p.y); c.rotate(p.r);
+  c.scale(1, Math.cos(p.l * p.f + p.ph));
+  c.globalAlpha = Math.min(1, (p.m - p.l) * 1.5); c.fillStyle = p.c;
+  c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+  c.restore();
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.05, (now - last) / 1000); last = now;
+  const t = now / 1000;
+
+  sctx.clearRect(0, 0, W, H);
+  for (const s of stars) {
+    const a = .3 + .7 * (.5 + .5 * Math.sin(t * s.sp + s.ph));
+    sctx.globalAlpha = a; sctx.fillStyle = "#fff3dc";
+    sctx.beginPath(); sctx.arc(s.x, s.y, s.r, 0, 6.283); sctx.fill();
+    if (s.big) {
+      sctx.globalAlpha = a * .5; sctx.fillRect(s.x - 5, s.y - .4, 10, .8); sctx.fillRect(s.x - .4, s.y - 5, .8, 10);
+    }
+  }
+
+  if (trail) {
+    const r = envBtn.getBoundingClientRect();
+    for (let i = 0; i < 2; i++) {
+      spark(r.left + Math.random() * r.width, r.top + r.height * rand(.1, .9), rand(-14, 14), rand(-24, 6), rand(1.2, 3.2), rand(.7, 1.4), 18);
+    }
+  }
+  if (petalRate > 0) {
+    petalAcc += petalRate * dt;
+    while (petalAcc >= 1) { petal(); petalAcc--; }
+  }
+
+  fctx.clearRect(0, 0, W, H);
+  for (let i = P.length - 1; i >= 0; i--) {
+    const p = P[i];
+    p.l += dt;
+    if (p.k === 0) {
+      const d = Math.pow(.94, dt * 60);
+      p.vx *= d; p.vy = p.vy * d + p.g * dt;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.r += dt * 2;
+      if (p.l >= p.m) { P.splice(i, 1); continue; }
+      const a = (1 - p.l / p.m) * (.6 + .4 * Math.sin(p.l * 18 + p.r * 3));
+      fctx.globalCompositeOperation = "lighter";
+      drawSpark(fctx, p, Math.max(0, a));
+      fctx.globalCompositeOperation = "source-over";
+    } else if (p.k === 1) {
+      p.x += (p.vx + Math.sin(p.l * p.f + p.ph) * 28) * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      if (p.y > H + 30) { P.splice(i, 1); continue; }
+      drawPetal(fctx, p);
+    } else {
+      const d = Math.pow(.985, dt * 60);
+      p.vx *= d; p.vy = p.vy * d + 420 * dt;
+      if (p.vy > 220) p.vy = 220;
+      p.x += (p.vx + Math.sin(p.l * 3 + p.ph) * 18) * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      if (p.y > H + 20 || p.l > p.m) { P.splice(i, 1); continue; }
+      drawConfetti(fctx, p);
+    }
+  }
+  fctx.globalAlpha = 1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- sequence ---------- */
+function center(el) { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2, r]; }
+
+function intro() {
+  stage.classList.add("intro");
+  later(() => { trail = true; }, 550);
+}
+envBtn.addEventListener("animationend", (e) => {
+  if (e.animationName !== "descend") return;
+  trail = false;
+  stage.classList.add("landed");
+  const [x, , r] = center(envBtn);
+  burstAt(x, r.bottom - 4, 26, { dir: -Math.PI / 2, spread: Math.PI * 1.1, speed: [50, 170], size: [1.5, 3.5], life: [.6, 1.2], g: 30 });
+  later(() => stage.classList.add("ready"), 300);
+});
+intro();
+
+function liftLetter() {
+  const first = mini.getBoundingClientRect();
+  reader.hidden = false;
+  reader.classList.remove("closing");
+  scroll.scrollTop = 0;
+  const lastR = sheet.getBoundingClientRect();
+  sheet.style.transition = "none";
+  sheet.style.transform =
+    `translate(${first.left - lastR.left}px, ${first.top - lastR.top}px) ` +
+    `scale(${first.width / lastR.width}, ${first.height / lastR.height}) rotate(-1.5deg)`;
+  mini.style.visibility = "hidden";
+  void sheet.offsetWidth;
+  sheet.style.transition = `transform ${T(950)}ms cubic-bezier(.2,.8,.2,1)`;
+  sheet.style.transform = "none";
+  stage.classList.add("leave");
+}
+
+function open() {
+  if (busy || !stage.classList.contains("ready")) return;
+  busy = true;
+  stage.classList.add("opening");
+  const [sx, sy] = center(seal);
+  burstAt(sx, sy, 60, { speed: [90, 320], size: [2, 5.5], life: [.9, 1.9], g: 70 });
+  later(() => stage.classList.add("open"), 300);
+  later(() => flap.classList.add("behind"), 720);
+  later(() => { for (let i = 0; i < 10; i++) petal(rand(-H * .3, -10)); petalRate = 11; }, 500);
+  later(() => (petalRate = 2.2), 3800);
+  later(() => stage.classList.add("pull1"), 1100);
+  later(() => stage.classList.add("pull2"), 2300);
+  later(liftLetter, 3050);
+  later(() => scroll.classList.add("show"), 3850);
+}
+envBtn.addEventListener("click", open);
+
+function showFinale() {
+  finale.hidden = false;
+  fxCanvas.classList.add("top");
+  void finale.offsetWidth;
+  finale.classList.add("on");
+  petalRate = 0;
+  later(() => {
+    const [cx, cy] = center($("fCrown"));
+    burstAt(cx, cy, 80, { speed: [120, 380], size: [2, 6], life: [1, 2.1], g: 50 });
+    confettiBurst(cx, cy + 20, 70);
+    confettiRain(70);
+    petalRate = 5;
+  }, 1250);
+  later(() => (petalRate = 2), 5000);
+}
+
+function hideFinale(cb) {
+  finale.classList.remove("on");
+  setTimeout(() => { finale.hidden = true; fxCanvas.classList.remove("top"); cb && cb(); }, 600);
+}
+$("reread").addEventListener("click", () => { hideFinale(); crownBtn.querySelector("span").textContent = "Надеть корону ещё раз"; scroll.scrollTop = 0; });
+$("restart").addEventListener("click", () => hideFinale(reset));
+
+function reset() {
+  timers.forEach(clearTimeout); timers = [];
+  petalRate = 0; trail = false; P.length = 0;
+  reader.classList.add("closing");
+  setTimeout(() => {
+    reader.hidden = true;
+    scroll.classList.remove("show");
+    sheet.style.transition = "none";
+    sheet.style.transform = "";
+    stage.classList.add("no-tr");
+    stage.classList.remove("intro", "landed", "ready", "opening", "open", "pull1", "pull2", "leave");
+    flap.classList.remove("behind");
+    mini.style.visibility = "";
+    void stage.offsetWidth;
+    stage.classList.remove("no-tr");
+    busy = false;
+    intro();
+  }, 460);
+}
+</script>
+
+</body>
+</html>
